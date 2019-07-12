@@ -32,9 +32,11 @@ class SelectionDialog extends StatefulWidget {
 class _SelectionDialogState extends State<SelectionDialog> {
   /// this is useful for filtering purpose
   List<CountryCode> filteredElements;
+  List<Widget> widgets;
 
   @override
-  Widget build(BuildContext context) => SimpleDialog(
+  Widget build(BuildContext context) {
+    return SimpleDialog(
       title: Column(
         children: <Widget>[
           TextField(
@@ -46,40 +48,45 @@ class _SelectionDialogState extends State<SelectionDialog> {
       ),
       children: [
         Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: ListView(
-            children: [
-              widget.favoriteElements.isEmpty
-                  ? const DecoratedBox(decoration: BoxDecoration())
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[]
-                        ..addAll(widget.favoriteElements
-                            .map(
-                              (f) => SimpleDialogOption(
-                                    child: _buildOption(f),
-                                    onPressed: () {
-                                      _selectItem(f);
-                                    },
-                                  ),
-                            )
-                            .toList())
-                        ..add(const Divider())),
-            ]..addAll(filteredElements.isEmpty
-                ? [_buildEmptySearchWidget(context)]
-                : filteredElements.map(
-                    (e) => SimpleDialogOption(
-                      key: Key(e.toLongString()),
-                      child: _buildOption(e),
-                      onPressed: () {
-                        _selectItem(e);
-                      },
-                    )))
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: ListView(
+              children: widgets,
             )
+        ),
+      ],
+    );
+
+    return AlertDialog(
+      title: Column(
+        children: <Widget>[
+          TextField(
+            style: widget.searchStyle,
+            decoration: widget.searchDecoration,
+            onChanged: _filterElements,
           ),
         ],
-      );
+      ),
+      content: Container(
+        //width: double.maxFinite,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Expanded(child:
+                  ListView.builder(itemBuilder: (context, i) {
+                  },
+                  shrinkWrap: true,
+                    itemCount: 0,
+                  )
+              )
+            ]
+        ),
+      ),
+    );
+
+  }
 
   Widget _buildOption(CountryCode e) {
     return Container(
@@ -122,6 +129,33 @@ class _SelectionDialogState extends State<SelectionDialog> {
   @override
   void initState() {
     filteredElements = widget.elements;
+    widgets = [
+      widget.favoriteElements.isEmpty
+          ? const DecoratedBox(decoration: const BoxDecoration())
+          : Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[]
+            ..addAll(widget.favoriteElements
+                .map(
+                  (f) => SimpleDialogOption(
+                child: _buildOption(f),
+                onPressed: () {
+                  _selectItem(f);
+                },
+              ),
+            )
+                .toList())
+            ..add(const Divider())),
+    ]..addAll(filteredElements.isEmpty
+        ? [_buildEmptySearchWidget(context)]
+        : filteredElements.map(
+            (e) => SimpleDialogOption(
+          key: Key(e.toLongString()),
+          child: _buildOption(e),
+          onPressed: () {
+            _selectItem(e);
+          },
+        )));
     super.initState();
   }
 
